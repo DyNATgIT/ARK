@@ -5,28 +5,25 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import {
     CheckCircle2,
-    Circle,
     Clock,
     AlertCircle,
-    Play,
-    Pause,
     ChevronLeft,
-    MoreVertical,
     Activity,
-    MessageSquare,
     Zap,
-    ArrowLeft, // Retained as it's used in the JSX
-    FileText, // Retained as it's used in the phases array
-    UserCheck, // Retained as it's used in the phases array
-    Database, // Retained as it's used in the phases array
-    Monitor, // Retained as it's used in the phases array
-    Bell // Retained as it's used in the phases array
+    ArrowLeft,
+    FileText,
+    UserCheck,
+    Database,
+    Monitor,
+    Bell,
+    ExternalLink
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function WorkflowDetailPage() {
     const { id } = useParams();
@@ -49,82 +46,105 @@ export default function WorkflowDetailPage() {
         };
 
         fetchWorkflow();
-        const interval = setInterval(fetchWorkflow, 5000); // Poll every 5s
+        const interval = setInterval(fetchWorkflow, 5000);
         return () => clearInterval(interval);
     }, [id]);
 
     if (isLoading) {
         return (
-            <div className="flex h-96 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+            <div className="flex h-[70vh] items-center justify-center">
+                <div className="relative">
+                    <div className="h-20 w-20 animate-spin rounded-full border-4 border-primary/10 border-t-primary" />
+                    <div className="absolute inset-0 h-20 w-20 animate-pulse rounded-full bg-primary/20 blur-2xl" />
+                </div>
             </div>
         );
     }
 
     if (!workflow) {
         return (
-            <div className="flex h-96 flex-col items-center justify-center space-y-4">
-                <AlertCircle className="h-12 w-12 text-red-500" />
-                <h2 className="text-xl font-semibold">Workflow not found</h2>
-                <Button onClick={() => router.push("/onboarding")}>Back to List</Button>
+            <div className="flex h-[60vh] flex-col items-center justify-center space-y-6">
+                <div className="p-4 rounded-3xl bg-destructive/10 border border-destructive/20">
+                    <AlertCircle className="h-12 w-12 text-destructive" />
+                </div>
+                <h2 className="text-3xl font-black text-white">Logic Protocol Not Found</h2>
+                <Button onClick={() => router.push("/dashboard/onboarding")} className="rounded-2xl bg-white text-black font-bold px-8 py-6">Re-link Dashboard</Button>
             </div>
         );
     }
 
-    // Mock data for phases and logs, will be replaced by workflow.phases and workflow.logs
-    // if the fetched workflow object contains them.
-    const phases = workflow.phases || [
-        { id: "intake", title: "Customer Intake", icon: FileText, status: "completed" },
-        { id: "identity", title: "Identity Verification", icon: UserCheck, status: "completed" },
-        { id: "legal", title: "Legal Documents", icon: FileText, status: "in_progress" },
-        { id: "crm", title: "CRM Setup", icon: Database, status: "pending" },
-        { id: "provisioning", title: "IT Provisioning", icon: Monitor, status: "pending" },
-        { id: "notification", title: "Final Notifications", icon: Bell, status: "pending" },
+    // Map dynamic steps to phases
+    const defaultPhases = [
+        { id: "intake", title: "Customer Intake", icon: FileText, desc: "Data ingestion and mapping." },
+        { id: "identity_verification", title: "Identity Warden", icon: UserCheck, desc: "Biometric and KYC vetting." },
+        { id: "legal_documents", title: "Legal Counsel", icon: FileText, desc: "Synthesis and compliance." },
+        { id: "crm_setup", title: "CRM Orchestration", icon: Database, desc: "Enterprise entity sync." },
+        { id: "provisioning", title: "IT Environment", icon: Monitor, desc: "Stack access control." },
+        { id: "notification", title: "Protocol Exit", icon: Bell, desc: "Completion broadcast." }
     ];
 
-    const logs = workflow.logs || [
-        { time: "10:00 AM", agent: "System", message: "Workflow started for TechStart Inc" },
-        { time: "10:05 AM", agent: "Identity Agent", message: "KYC verification initiated" },
-        { time: "10:07 AM", agent: "Identity Agent", message: "KYC verified successfully. Confidence: 0.98" },
-        { time: "10:10 AM", agent: "Legal Agent", message: "Service agreement generated from template" },
-        { time: "10:11 AM", agent: "Legal Agent", message: "E-signature request sent to john@techstart.com" },
-    ];
+    const phases = defaultPhases.map(p => {
+        const step = (workflow.steps || []).find((s: any) => s.step_name === p.id);
+        return {
+            ...p,
+            status: step ? step.status : "pending"
+        };
+    });
+
+    const logs = (workflow.steps || [])
+        .filter((s: any) => s.status === "completed" || s.status === "running")
+        .map((s: any) => ({
+            t: new Date(s.completed_at || s.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            a: s.step_name.split('_')[0].toUpperCase(),
+            m: s.status === "completed" ? `Successfully executed ${s.step_name} protocol.` : `Active execution in progress...`,
+            s: s.status === "completed" ? "success" : "neutral"
+        })).reverse();
+
+    const currentStepIndex = phases.findIndex(p => p.status === "in_progress" || p.status === "running") + 1 || (workflow.completed_steps || 0) + 1;
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <Link href="/onboarding">
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft className="h-4 w-4" />
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-10 max-w-7xl mx-auto"
+        >
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="flex items-start space-x-6">
+                    <Link href="/dashboard/onboarding">
+                        <Button variant="ghost" className="rounded-2xl glass hover:bg-white/10 p-3 h-14 w-14 group">
+                            <ArrowLeft className="h-6 w-6 text-white group-hover:-translate-x-1 transition-transform" />
                         </Button>
                     </Link>
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-                            Onboarding: TechStart Inc
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
-                                In Progress
+                        <div className="flex items-center gap-4 mb-3">
+                            <h2 className="text-5xl font-black tracking-tight text-white uppercase leading-none">
+                                {workflow.customer_name || "Protocol Active"}
+                            </h2>
+                            <Badge className="bg-primary/20 text-primary border-primary/20 px-4 py-1.5 rounded-xl font-black uppercase text-[10px] tracking-widest animate-pulse">
+                                {workflow.status === 'completed' ? 'Protocol Finalized' : `Executing Phase ${currentStepIndex}`}
                             </Badge>
-                        </h2>
-                        <p className="text-slate-500 dark:text-slate-400">
-                            Workflow ID: {id} • Started 2 hours ago
+                        </div>
+                        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                            System ID: <span className="text-white/40 font-mono">{id}</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                            {workflow.status.replace('_', ' ')}
                         </p>
                     </div>
                 </div>
-                <div className="flex space-x-3">
-                    <Button variant="outline">Pause Workflow</Button>
-                    <Button className="bg-blue-600 hover:bg-blue-700">Approve Next Step</Button>
+                <div className="flex gap-4">
+                    <Button variant="ghost" className="rounded-2xl glass hover:bg-white/5 font-bold h-14 px-8 text-white">Manual Pause</Button>
+                    <Button className="rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold h-14 px-8 shadow-2xl shadow-primary/20">Authorize Override</Button>
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
-                {/* Timeline / Progress */}
-                <Card className="md:col-span-2 border-slate-200 dark:border-slate-800">
-                    <CardHeader>
-                        <CardTitle>Workflow Timeline</CardTitle>
-                        <CardDescription>Track the automated agent sequence</CardDescription>
+            <div className="grid lg:grid-cols-3 gap-10">
+                {/* Protocol Timeline */}
+                <Card className="lg:col-span-2 glass-premium border-white/5 rounded-[2.5rem] overflow-hidden">
+                    <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
+                        <CardTitle className="text-2xl font-black text-white uppercase tracking-tighter">Workflow Runtime</CardTitle>
+                        <CardDescription className="text-slate-500 font-medium tracking-tight">Real-time status of the automated agent sequence.</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-10">
                         <div className="space-y-0 relative">
                             {phases.map((phase, index) => {
                                 const Icon = phase.icon;
@@ -132,38 +152,41 @@ export default function WorkflowDetailPage() {
 
                                 return (
                                     <div key={phase.id} className="flex group">
-                                        <div className="flex flex-col items-center mr-4">
+                                        <div className="flex flex-col items-center mr-8">
                                             <div className={cn(
-                                                "flex h-10 w-10 items-center justify-center rounded-full border-2 z-10",
-                                                phase.status === "completed" ? "bg-green-500 border-green-500 text-white" :
-                                                    phase.status === "in_progress" ? "bg-white border-blue-500 text-blue-500 animate-pulse dark:bg-slate-900" :
-                                                        "bg-white border-slate-200 text-slate-300 dark:bg-slate-900 dark:border-slate-800"
+                                                "relative flex h-14 w-14 items-center justify-center rounded-[1.25rem] border-2 transition-all duration-500 z-10",
+                                                phase.status === "completed" ? "bg-emerald-500/20 border-emerald-500 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]" :
+                                                    phase.status === "in_progress" ? "bg-primary border-primary text-white shadow-[0_0_30px_rgba(110,89,255,0.4)] scale-110" :
+                                                        "bg-white/[0.02] border-white/5 text-slate-700"
                                             )}>
-                                                {phase.status === "completed" ? <CheckCircle2 className="h-6 w-6" /> : <Icon className="h-5 w-5" />}
+                                                {phase.status === "completed" ? <CheckCircle2 className="h-8 w-8 stroke-[3px]" /> : <Icon className="h-6 w-6 stroke-[2px]" />}
+                                                {phase.status === "in_progress" && (
+                                                    <div className="absolute inset-[-4px] rounded-[1.5rem] border-2 border-primary/30 animate-ping" />
+                                                )}
                                             </div>
                                             {!isLast && (
                                                 <div className={cn(
-                                                    "w-0.5 h-12",
-                                                    phase.status === "completed" ? "bg-green-500" : "bg-slate-200 dark:bg-slate-800"
+                                                    "w-1 h-14 my-2 transition-all duration-700 rounded-full",
+                                                    phase.status === "completed" ? "bg-gradient-to-b from-emerald-500 to-primary" : "bg-white/5"
                                                 )} />
                                             )}
                                         </div>
-                                        <div className="flex-1 pb-10">
-                                            <div className="flex items-center justify-between">
+                                        <div className="flex-1 pb-14 pt-2">
+                                            <div className="flex items-center justify-between mb-2">
                                                 <h4 className={cn(
-                                                    "font-semibold text-lg",
-                                                    phase.status === "pending" ? "text-slate-400" : "text-slate-900 dark:text-white"
+                                                    "font-black text-xl tracking-tight uppercase transition-colors",
+                                                    phase.status === "pending" ? "text-slate-700" : "text-white"
                                                 )}>
                                                     {phase.title}
                                                 </h4>
                                                 {phase.status === "in_progress" && (
-                                                    <span className="text-xs font-medium text-blue-500 uppercase tracking-wider">Active</span>
+                                                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">Current Vector</span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                                {phase.status === "completed" ? "Task executed successfully" :
-                                                    phase.status === "in_progress" ? "Agent is currently processing this stage" :
-                                                        "Awaiting previous steps"}
+                                            <p className="text-slate-500 font-medium leading-relaxed italic">
+                                                {phase.status === "completed" ? "Protocol synthesis finalized." :
+                                                    phase.status === "in_progress" ? "Active agent executing sequence." :
+                                                        "Awaiting preceding logic vector."}
                                             </p>
                                         </div>
                                     </div>
@@ -173,46 +196,55 @@ export default function WorkflowDetailPage() {
                     </CardContent>
                 </Card>
 
-                {/* Agent Activity Feed */}
-                <div className="space-y-6">
-                    <Card className="border-slate-200 dark:border-slate-800">
-                        <CardHeader>
-                            <CardTitle>Agent Logs</CardTitle>
-                            <CardDescription>Live telemetry from active agents</CardDescription>
+                {/* Lateral Intel Feed */}
+                <div className="space-y-10">
+                    <Card className="glass-premium border-white/5 rounded-[2.5rem] overflow-hidden">
+                        <CardHeader className="p-8 border-b border-white/5 bg-white/[0.02] flex flex-row items-center justify-between space-y-0">
+                            <div>
+                                <CardTitle className="text-lg font-black text-white uppercase tracking-tighter">Agent Telemetry</CardTitle>
+                                <CardDescription className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Active Stream</CardDescription>
+                            </div>
+                            <Activity className="w-5 h-5 text-primary animate-pulse" />
                         </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {logs.map((log, i) => (
-                                    <div key={i} className="flex space-x-3 text-sm border-l-2 border-slate-100 dark:border-slate-800 pl-4 py-1">
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="font-medium text-slate-900 dark:text-white">{log.agent}</span>
-                                                <span className="text-xs text-slate-400">{log.time}</span>
-                                            </div>
-                                            <p className="text-slate-600 dark:text-slate-400">{log.message}</p>
+                        <CardContent className="p-8">
+                            <div className="space-y-6">
+                                {logs.length > 0 ? logs.map((log: any, i: number) => (
+                                    <div key={i} className="group relative flex flex-col space-y-2 border-l-2 border-white/5 pl-6 py-1">
+                                        <div className="absolute left-[-5px] top-2 w-2 h-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-black text-[10px] text-primary uppercase tracking-widest">{log.a}</span>
+                                            <span className="text-[10px] font-mono text-slate-700">{log.t}</span>
                                         </div>
+                                        <p className="text-xs text-slate-400 font-medium tracking-tight leading-relaxed">{log.m}</p>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="text-center py-10">
+                                        <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest">No telemetry captured</p>
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-slate-900 text-white border-none shadow-xl">
-                        <CardHeader>
-                            <CardTitle className="text-lg">AI Insight</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <p className="text-sm text-slate-400 leading-relaxed italic">
-                                "The Legal Agent has detected that the customer's jurisdiction requires a specific amendment to the Data Processing Addendum. I've automatically added this to the generated contract."
-                            </p>
-                            <div className="flex items-center space-x-2 text-xs text-blue-400 font-medium pb-2 border-b border-slate-800">
-                                <AlertCircle className="h-3 w-3" />
-                                <span>No action required from user</span>
+                    <Card className="rounded-[2.5rem] bg-gradient-to-br from-primary to-accent p-1 shadow-[0_20px_60px_-15px_rgba(110,89,255,0.4)]">
+                        <div className="bg-neutral-950 rounded-[2.3rem] p-8 h-full">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Zap className="w-5 h-5 text-primary fill-primary" />
+                                <h3 className="text-lg font-black text-white uppercase tracking-tighter leading-none pt-1">AI Synthesis</h3>
                             </div>
-                        </CardContent>
+                            <p className="text-sm text-slate-400 leading-relaxed font-medium mb-6">
+                                {workflow.status === 'completed'
+                                    ? "Orchestration sequence finalized. All agents report successful synchronization. System transition to production status recommended."
+                                    : "Autonomous agents are currently synthesizing jurisdictional requirements and security protocols. Self-correction logic active."}
+                            </p>
+                            <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Auto-Correction Active</span>
+                                <ExternalLink className="w-3 h-3 text-primary cursor-pointer hover:scale-110 transition-transform" />
+                            </div>
+                        </div>
                     </Card>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }

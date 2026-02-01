@@ -1,10 +1,13 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getStatusColor } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export default function OnboardingPage() {
     const [onboardingData, setOnboardingData] = useState<any[]>([]);
@@ -25,122 +28,129 @@ export default function OnboardingPage() {
         };
 
         fetchOnboardings();
-        // Poll for updates every 10 seconds
         const interval = setInterval(fetchOnboardings, 10000);
         return () => clearInterval(interval);
     }, []);
 
     if (isLoading) {
         return (
-            <div className="flex h-96 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+            <div className="flex h-[60vh] items-center justify-center">
+                <div className="relative">
+                    <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+                    <div className="absolute inset-0 h-16 w-16 animate-pulse rounded-full bg-primary/10 blur-xl" />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between">
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-10 max-w-[1600px] mx-auto"
+        >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Onboarding Workflows
+                    <h2 className="text-4xl font-black tracking-tight text-white mb-2 uppercase">
+                        Onboarding <span className="text-primary font-light">Workflows</span>
                     </h2>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        Manage and monitor active customer onboarding processes.
+                    <p className="text-slate-500 font-medium">
+                        Autonomous orchestration pipeline for customer success.
                     </p>
                 </div>
                 <Link href="/dashboard/onboarding/new">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        New Onboarding
+                    <Button className="px-8 py-6 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                        <Plus className="mr-2 h-5 w-5 stroke-[3px]" />
+                        Launch New Pipeline
                     </Button>
                 </Link>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Active Workflows</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="rounded-md border border-slate-200 dark:border-slate-800">
+            <div className="grid grid-cols-1 gap-6">
+                <Card className="glass-premium border-white/5 overflow-hidden rounded-[2rem]">
+                    <CardHeader className="px-8 pt-8 pb-0 flex flex-row items-center justify-between border-b border-white/5 bg-white/5">
+                        <div className="pb-6">
+                            <CardTitle className="text-xl font-bold text-white tracking-tight">Active Pipelines</CardTitle>
+                        </div>
+                        <div className="flex items-center space-x-2 pb-6">
+                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-white/5">
+                                <Search className="w-5 h-5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-white/5">
+                                <Filter className="w-5 h-5" />
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
                         <div className="relative w-full overflow-auto">
-                            <table className="w-full caption-bottom text-sm">
-                                <thead className="[&_tr]:border-b [&_tr]:border-slate-200 dark:[&_tr]:border-slate-800">
-                                    <tr className="border-b transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50 data-[state=selected]:bg-slate-50 dark:data-[state=selected]:bg-slate-800">
-                                        <th className="h-12 px-4 text-left align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Customer
-                                        </th>
-                                        <th className="h-12 px-4 text-left align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Type
-                                        </th>
-                                        <th className="h-12 px-4 text-left align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Status
-                                        </th>
-                                        <th className="h-12 px-4 text-left align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Progress
-                                        </th>
-                                        <th className="h-12 px-4 text-left align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Current Step
-                                        </th>
-                                        <th className="h-12 px-4 text-left align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Started
-                                        </th>
-                                        <th className="h-12 px-4 text-right align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Actions
-                                        </th>
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="bg-white/[0.02]">
+                                        <th className="h-14 px-8 text-left align-middle font-semibold text-slate-500 uppercase tracking-widest text-[0.65rem]">Customer</th>
+                                        <th className="h-14 px-8 text-left align-middle font-semibold text-slate-500 uppercase tracking-widest text-[0.65rem]">Logic Type</th>
+                                        <th className="h-14 px-8 text-left align-middle font-semibold text-slate-500 uppercase tracking-widest text-[0.65rem]">State</th>
+                                        <th className="h-14 px-8 text-left align-middle font-semibold text-slate-500 uppercase tracking-widest text-[0.65rem]">Flow Map</th>
+                                        <th className="h-14 px-8 text-left align-middle font-semibold text-slate-500 uppercase tracking-widest text-[0.65rem]">Entry Pt</th>
+                                        <th className="h-14 px-8 text-right align-middle font-semibold text-slate-500 uppercase tracking-widest text-[0.65rem]">Control</th>
                                     </tr>
                                 </thead>
-                                <tbody className="[&_tr:last-child]:border-0">
+                                <tbody>
                                     {onboardingData.map((item) => (
                                         <tr
                                             key={item.id}
-                                            className="border-b transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
+                                            className="border-b border-white/5 transition-colors hover:bg-white/[0.03] group"
                                         >
-                                            <td className="p-4 align-middle font-medium">
-                                                {item.customer_name || "Unknown Customer"}
+                                            <td className="p-8 align-middle">
+                                                <div className="font-bold text-white group-hover:text-primary transition-colors">{item.customer_name || "Nexus Corp"}</div>
                                             </td>
-                                            <td className="p-4 align-middle capitalize">{item.workflow_type.replace("_", " ")}</td>
-                                            <td className="p-4 align-middle">
+                                            <td className="p-8 align-middle">
+                                                <span className="text-slate-400 font-medium capitalize">{item.workflow_type.replace("_", " ")}</span>
+                                            </td>
+                                            <td className="p-8 align-middle">
                                                 <span
-                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
+                                                    className={`inline-flex items-center rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-tighter ${getStatusColor(
                                                         item.status
                                                     )}`}
                                                 >
                                                     {item.status.replace("_", " ")}
                                                 </span>
                                             </td>
-                                            <td className="p-4 align-middle">
-                                                <div className="w-full max-w-[100px]">
-                                                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                                        <div
-                                                            className="h-full bg-blue-500 transition-all duration-500 ease-in-out"
-                                                            style={{ width: `${item.progress_percentage}%` }}
+                                            <td className="p-8 align-middle">
+                                                <div className="w-40">
+                                                    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${item.progress_percentage}%` }}
+                                                            className="h-full bg-gradient-to-r from-primary to-accent"
                                                         />
                                                     </div>
-                                                    <span className="mt-1 text-xs text-slate-500">
-                                                        {item.progress_percentage}%
+                                                    <span className="mt-2 block text-[10px] font-black text-slate-500 uppercase">
+                                                        {item.progress_percentage}% Coverage
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="p-4 align-middle">{item.current_step || "N/A"}</td>
-                                            <td className="p-4 align-middle text-slate-500">
-                                                {item.started_at ? new Date(item.started_at).toLocaleString() : "Not started"}
+                                            <td className="p-8 align-middle">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-xs text-slate-400 font-medium">{item.current_step || "Init Logic"}</span>
+                                                </div>
                                             </td>
-                                            <td className="p-4 align-middle text-right">
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <Link href={`/dashboard/onboarding/${item.id}`}>
-                                                        View
-                                                    </Link>
-                                                </Button>
+                                            <td className="p-8 align-middle text-right">
+                                                <Link href={`/dashboard/onboarding/${item.id}`}>
+                                                    <Button variant="ghost" size="sm" className="rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 text-white font-bold group/btn">
+                                                        View Protocol
+                                                        <ArrowUpRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                                    </Button>
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </motion.div>
     );
 }

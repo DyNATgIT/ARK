@@ -7,11 +7,13 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <div className="min-h-screen bg-background">
             <Sidebar />
-            <div className="lg:pl-72">
+            <div className="lg:pl-72 relative">
                 <Header />
-                <main className="py-6 px-4 sm:px-6 lg:px-8">{children}</main>
+                <main className="py-10 px-6 sm:px-10 lg:px-12 relative z-10">{children}</main>
+                {/* Dashboard ambient glow */}
+                <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
             </div>
         </div>
     );

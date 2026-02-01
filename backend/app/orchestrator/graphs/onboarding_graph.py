@@ -59,7 +59,7 @@ async def identity_verification_node(state: OnboardingState) -> dict[str, Any]:
     result = await agent.run(task)
 
     return {
-        "identity_result": {
+        "identity_verification_result": {
             "status": "completed" if result.success else "failed",
             "verified": result.success,
             "confidence_score": result.confidence_score,
@@ -90,7 +90,7 @@ async def legal_documents_node(state: OnboardingState) -> dict[str, Any]:
     result = await agent.run(task)
 
     return {
-        "legal_result": {
+        "legal_documents_result": {
             "status": "completed" if result.success else "failed",
             "contract_generated": result.success,
             "esign_status": "sent" if result.success else "failed",
@@ -119,7 +119,7 @@ async def crm_setup_node(state: OnboardingState) -> dict[str, Any]:
     result = await agent.run(task)
 
     return {
-        "crm_result": {
+        "crm_setup_result": {
             "status": "completed" if result.success else "failed",
             "record_created": result.success,
             "details": result.data,

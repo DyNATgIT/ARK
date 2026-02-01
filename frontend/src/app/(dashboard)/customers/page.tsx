@@ -1,140 +1,131 @@
 "use client";
 
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, User, Building2, Mail, Globe, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 const customersData = [
-    {
-        id: "1",
-        name: "John Smith",
-        company: "TechStart Inc",
-        email: "john@techstart.io",
-        status: "active",
-        type: "Business",
-    },
-    {
-        id: "2",
-        name: "Sarah Johnson",
-        company: "Global Dynamics",
-        email: "s.johnson@gd.com",
-        status: "onboarding",
-        type: "Enterprise",
-    },
-    {
-        id: "3",
-        name: "Mike Brown",
-        company: "Small Biz LLC",
-        email: "mike@smallbiz.com",
-        status: "active",
-        type: "Business",
-    },
-    {
-        id: "4",
-        name: "Emily Davis",
-        company: "Future Systems",
-        email: "e.davis@futuresys.com",
-        status: "churned",
-        type: "Enterprise",
-    },
+    { id: "1", name: "John Smith", company: "TechStart Inc", email: "john@techstart.io", status: "active", type: "Business" },
+    { id: "2", name: "Sarah Johnson", company: "Global Dynamics", email: "s.johnson@gd.com", status: "onboarding", type: "Enterprise" },
+    { id: "3", name: "Mike Brown", company: "Small Biz LLC", email: "mike@smallbiz.com", status: "active", type: "Business" },
+    { id: "4", name: "Emily Davis", company: "Future Systems", email: "e.davis@futuresys.com", status: "churned", type: "Enterprise" },
 ];
 
 export default function CustomersPage() {
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between">
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-10 max-w-[1600px] mx-auto"
+        >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Customers
+                    <h2 className="text-4xl font-black tracking-tight text-white mb-2 uppercase italic">
+                        Customer <span className="text-primary font-light not-italic">Registry</span>
                     </h2>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        View and manage your customer directory.
+                    <p className="text-slate-500 font-medium font-outfit uppercase tracking-widest text-[10px]">
+                        Enterprise Entity Database | Unified Identity System
                     </p>
                 </div>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Customer
+                <Button className="px-8 py-6 rounded-2xl bg-white text-black font-bold shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    <Plus className="mr-2 h-5 w-5 stroke-[3px]" />
+                    Register New Entity
                 </Button>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>All Customers</CardTitle>
-                        <div className="relative w-64">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
+            <Card className="glass-premium border-white/5 rounded-[2.5rem] overflow-hidden">
+                <CardHeader className="p-10 border-b border-white/5 bg-white/[0.02]">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <CardTitle className="text-2xl font-black text-white uppercase tracking-tighter">All Entities</CardTitle>
+                            <CardDescription className="text-slate-500">Managing {customersData.length} records across 4 clusters.</CardDescription>
+                        </div>
+                        <div className="relative w-full md:w-96 group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-primary transition-colors" />
                             <input
-                                placeholder="Search customers..."
-                                className="h-9 w-full rounded-md border border-slate-200 bg-transparent pl-8 text-sm outline-none placeholder:text-slate-500 focus:border-blue-500 dark:border-slate-800"
+                                placeholder="Filter by Name, ID, or Cluster..."
+                                className="h-14 w-full rounded-2xl glass border-white/5 bg-white/[0.03] pl-12 pr-4 text-sm text-white outline-none placeholder:text-slate-600 focus:border-primary/50 focus:bg-white/[0.05] transition-all"
                             />
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="rounded-md border border-slate-200 dark:border-slate-800">
-                        <div className="relative w-full overflow-auto">
-                            <table className="w-full caption-bottom text-sm">
-                                <thead className="[&_tr]:border-b [&_tr]:border-slate-200 dark:[&_tr]:border-slate-800">
-                                    <tr className="border-b transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50 text-left">
-                                        <th className="h-12 px-4 align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Name
-                                        </th>
-                                        <th className="h-12 px-4 align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Company
-                                        </th>
-                                        <th className="h-12 px-4 align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Email
-                                        </th>
-                                        <th className="h-12 px-4 align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Type
-                                        </th>
-                                        <th className="h-12 px-4 align-middle font-medium text-slate-500 dark:text-slate-400">
-                                            Status
-                                        </th>
-                                        <th className="h-12 px-4 align-middle font-medium text-slate-500 dark:text-slate-400 text-right">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="[&_tr:last-child]:border-0">
-                                    {customersData.map((customer) => (
-                                        <tr
-                                            key={customer.id}
-                                            className="border-b transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
-                                        >
-                                            <td className="p-4 align-middle font-medium">
-                                                {customer.name}
-                                            </td>
-                                            <td className="p-4 align-middle">{customer.company}</td>
-                                            <td className="p-4 align-middle text-slate-500">
-                                                {customer.email}
-                                            </td>
-                                            <td className="p-4 align-middle">{customer.type}</td>
-                                            <td className="p-4 align-middle">
-                                                <span
-                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${customer.status === "active"
-                                                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                                            : customer.status === "onboarding"
-                                                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                                                                : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-400"
-                                                        }`}
-                                                >
+                <CardContent className="p-0">
+                    <div className="relative w-full overflow-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-white/[0.01]">
+                                    <th className="h-14 px-10 text-left align-middle font-black text-slate-600 uppercase tracking-[0.2em] text-[10px]">Entity Profile</th>
+                                    <th className="h-14 px-10 text-left align-middle font-black text-slate-600 uppercase tracking-[0.2em] text-[10px]">Organization</th>
+                                    <th className="h-14 px-10 text-left align-middle font-black text-slate-600 uppercase tracking-[0.2em] text-[10px]">Communication</th>
+                                    <th className="h-14 px-10 text-left align-middle font-black text-slate-600 uppercase tracking-[0.2em] text-[10px]">Tier</th>
+                                    <th className="h-14 px-10 text-left align-middle font-black text-slate-600 uppercase tracking-[0.2em] text-[10px]">State</th>
+                                    <th className="h-14 px-10 text-right align-middle font-black text-slate-600 uppercase tracking-[0.2em] text-[10px]">Operation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {customersData.map((customer) => (
+                                    <tr
+                                        key={customer.id}
+                                        className="border-b border-white/5 transition-colors hover:bg-white/[0.03] group/row"
+                                    >
+                                        <td className="p-10 align-middle">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="w-10 h-10 rounded-xl glass flex items-center justify-center text-primary group-hover/row:scale-110 transition-transform">
+                                                    <User className="w-5 h-5" />
+                                                </div>
+                                                <span className="font-bold text-white text-lg tracking-tight">{customer.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-10 align-middle">
+                                            <div className="flex items-center space-x-2 text-slate-400">
+                                                <Building2 className="w-4 h-4" />
+                                                <span className="font-medium">{customer.company}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-10 align-middle">
+                                            <div className="flex items-center space-x-2 text-slate-500 group-hover/row:text-slate-300 transition-colors">
+                                                <Mail className="w-4 h-4" />
+                                                <span className="font-medium text-xs">{customer.email}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-10 align-middle">
+                                            <span className="px-3 py-1 rounded-lg border border-white/5 bg-white/5 text-slate-400 font-black text-[9px] uppercase tracking-widest">
+                                                {customer.type}
+                                            </span>
+                                        </td>
+                                        <td className="p-10 align-middle">
+                                            <div className="flex items-center space-x-2">
+                                                <div className={cn(
+                                                    "w-2 h-2 rounded-full",
+                                                    customer.status === "active" ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" :
+                                                        customer.status === "onboarding" ? "bg-primary animate-pulse shadow-[0_0_10px_rgba(110,89,255,0.5)]" : "bg-slate-700"
+                                                )} />
+                                                <span className={cn(
+                                                    "text-[10px] font-black uppercase tracking-tighter",
+                                                    customer.status === "active" ? "text-emerald-500" :
+                                                        customer.status === "onboarding" ? "text-primary" : "text-slate-500"
+                                                )}>
                                                     {customer.status}
                                                 </span>
-                                            </td>
-                                            <td className="p-4 align-middle text-right">
-                                                <Button variant="ghost" size="sm">
-                                                    Edit
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-10 align-middle text-right">
+                                            <Button variant="ghost" size="icon" className="rounded-xl glass hover:bg-white/10 text-white group/btn">
+                                                <ArrowUpRight className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </motion.div>
     );
+}
+
+function cn(...classes: string[]) {
+    return classes.filter(Boolean).join(" ");
 }
