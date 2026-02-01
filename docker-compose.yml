@@ -70,7 +70,7 @@ services:
       dockerfile: ../docker/backend/Dockerfile.dev
     container_name: onboarding_backend
     ports:
-      - "8000:8000"
+      - "8080:8000"
     volumes:
       - ./backend:/app
     environment:
@@ -118,7 +118,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
     depends_on:
       - backend
     command: npm run dev

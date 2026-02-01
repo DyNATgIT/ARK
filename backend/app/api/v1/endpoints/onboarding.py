@@ -23,6 +23,7 @@ from app.models.schemas.onboarding import (
     OnboardingStats,
 )
 from app.orchestrator.workflow_engine import workflow_engine, create_initial_state
+from app.tasks import run_onboarding_workflow
 
 router = APIRouter()
 
@@ -80,8 +81,8 @@ async def start_wizard_onboarding(
         },
     )
 
-    # Run workflow in background
-    background_tasks.add_task(workflow_engine.execute, initial_state)
+    # Run workflow in background via Celery
+    run_onboarding_workflow.delay(initial_state)
 
     response_data = OnboardingResponse.model_validate(workflow)
     response_data.customer_name = customer.company_name
@@ -139,7 +140,20 @@ async def start_onboarding(
     await db.flush()
     await db.refresh(workflow)
 
-    # TODO: Trigger LangGraph workflow execution via Celery task
+    # Initialize and trigger orchestrator
+    initial_state = create_initial_state(
+        customer_id=str(customer.id),
+        workflow_id=str(workflow.id),
+        customer_data={
+            "email": customer.email,
+            "first_name": customer.first_name,
+            "last_name": customer.last_name,
+            "company_name": customer.company_name,
+        },
+    )
+
+    # Trigger LangGraph workflow execution via Celery task
+    run_onboarding_workflow.delay(initial_state)
 
     response_data = OnboardingResponse.model_validate(workflow)
     response_data.customer_name = customer.company_name

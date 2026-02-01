@@ -8,13 +8,14 @@ from sqlalchemy.pool import NullPool
 from app.config import settings
 
 # Create async engine
-engine = create_async_engine(
-    str(settings.database_url),
-    echo=settings.debug,
-    pool_size=settings.database_pool_size if not settings.debug else 5,
-    max_overflow=settings.database_max_overflow if not settings.debug else 0,
-    poolclass=NullPool if settings.debug else None,
-)
+engine_kwargs = {"echo": settings.debug}
+if settings.debug:
+    engine_kwargs["poolclass"] = NullPool
+else:
+    engine_kwargs["pool_size"] = settings.database_pool_size
+    engine_kwargs["max_overflow"] = settings.database_max_overflow
+
+engine = create_async_engine(str(settings.database_url), **engine_kwargs)
 
 # Session factory
 async_session_factory = async_sessionmaker(

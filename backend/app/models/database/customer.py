@@ -70,7 +70,7 @@ class Customer(BaseModel):
     external_ids: Mapped[dict] = mapped_column(JSONB, default=dict)
 
     # Additional metadata
-    metadata: Mapped[dict] = mapped_column(JSONB, default=dict)
+    additional_metadata: Mapped[dict] = mapped_column(JSONB, default=dict)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Source tracking

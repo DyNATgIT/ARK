@@ -11,14 +11,19 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN pip install poetry
+RUN pip install --no-cache-dir poetry
 
 # Copy dependency files
 COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
+# Install dependencies with retries and increased timeout
+# Set Poetry timeout via environment variable
+ENV POETRY_HTTP_TIMEOUT=120
+
+# Install dependencies with retries
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+    && (for i in 1 2 3; do poetry install --no-interaction --no-ansi --no-root --without dev && break || sleep 10; done)
 
 # Copy application code
 COPY . .

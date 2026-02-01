@@ -3,6 +3,7 @@
 import structlog
 from redis.asyncio import Redis
 
+from sqlalchemy import text
 from app.config import settings
 from app.database.session import engine
 
@@ -34,7 +35,7 @@ async def create_start_handler() -> None:
     # Test database connection
     try:
         async with engine.begin() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         await logger.ainfo("database_connected")
     except Exception as e:
         await logger.aerror("database_connection_failed", error=str(e))
